@@ -6,8 +6,8 @@ import os
 import time
 
 # ================== НАСТРОЙКИ ==================
-TOKEN = os.getenv("8748026062:AAHjTihiLCj5p8JPMOREhGmUf4HxS_AJV1A")
-CHAT_ID = os.getenv("-1002383860662")
+TOKEN = os.getenv(8748026062:AAHjTihiLCj5p8JPMOREhGmUf4HxS_AJV1A)
+CHAT_ID = os.getenv(-1002383860662)
 # ==============================================
 
 bot = telegram.Bot(token=TOKEN)
