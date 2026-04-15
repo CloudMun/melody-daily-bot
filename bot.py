@@ -3,18 +3,21 @@ from datetime import datetime
 import telegram
 import asyncio
 import os
-import time
 
-# ================== НАСТРОЙКИ ==================
-TOKEN = os.getenv(8748026062:AAHjTihiLCj5p8JPMOREhGmUf4HxS_AJV1A)
-CHAT_ID = os.getenv(-1002383860662)
-# ==============================================
+# ================== НАСТРОЙКИ (БЕРЁТ ИЗ RAILWAY) ==================
+TOKEN = os.getenv("TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+
+if not TOKEN or not CHAT_ID:
+    print("❌ Ошибка: TOKEN или CHAT_ID не найдены!")
+    exit(1)
+# ================================================
 
 bot = telegram.Bot(token=TOKEN)
 
 async def send_daily():
     today = datetime.now().strftime("%m-%d")
-    print(f"[{datetime.now()}] → Отправка медитации на {today}")
+    print(f"[{datetime.now()}] → Попытка отправить медитацию на {today}")
     
     try:
         with open('meditations.json', 'r', encoding='utf-8') as f:
@@ -30,11 +33,17 @@ async def send_daily():
         print(f"❌ Ошибка: {e}")
 
 async def main():
-    print("🤖 Бот запущен на Railway...")
+    print("🤖 Бот успешно запущен на Railway!")
     while True:
         now = datetime.now()
-        if now.hour == 10 and now.minute == 0:   # 10:00 по Москве (Railway — UTC+3)
+        # 10:00 по Москве (Railway использует UTC+3)
+        if now.hour == 10 and now.minute == 0:
             await send_daily()
+        
+        await asyncio.sleep(60)  # проверяет каждую минуту
+
+if __name__ == "__main__":
+    asyncio.run(main())
         
         await asyncio.sleep(60)  # проверка каждую минуту
 
