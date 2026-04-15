@@ -4,12 +4,12 @@ import telegram
 import asyncio
 import os
 
-# ================== НАСТРОЙКИ (БЕРЁТ ИЗ RAILWAY) ==================
+# ================== НАСТРОЙКИ ==================
 TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
 if not TOKEN or not CHAT_ID:
-    print("❌ Ошибка: TOKEN или CHAT_ID не найдены!")
+    print("❌ Ошибка: TOKEN или CHAT_ID не найдены в Variables!")
     exit(1)
 # ================================================
 
@@ -36,14 +36,9 @@ async def main():
     print("🤖 Бот успешно запущен на Railway!")
     while True:
         now = datetime.now()
-        # 10:00 по Москве (Railway использует UTC+3)
+        # 10:00 по Москве
         if now.hour == 10 and now.minute == 0:
             await send_daily()
-        
-        await asyncio.sleep(60)  # проверяет каждую минуту
-
-if __name__ == "__main__":
-    asyncio.run(main())
         
         await asyncio.sleep(60)  # проверка каждую минуту
 
