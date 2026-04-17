@@ -10,7 +10,6 @@ import uvicorn
 # ================== НАСТРОЙКИ ==================
 TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"
 PORT = int(os.getenv("PORT", 8000))
 
 if not TOKEN or not CHAT_ID:
