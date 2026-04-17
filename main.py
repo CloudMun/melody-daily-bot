@@ -60,11 +60,14 @@ async def send_meditation():
 
 async def scheduler():
     print("🤖 Планировщик запущен...")
-    
-    if TEST_MODE:
-        print("🧪 TEST_MODE: отправляем прямо сейчас")
-        await send_meditation()
-        return
+
+    while True:
+        now = datetime.now()
+        
+        if now.hour == 10 and now.minute == 0:
+            await send_meditation()
+        
+        await asyncio.sleep(60)
 
     while True:
         now = datetime.now()
