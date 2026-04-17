@@ -30,6 +30,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
+@app.head("/health")
 async def health():
     return {
         "status": "alive",
