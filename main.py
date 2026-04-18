@@ -33,10 +33,8 @@ app = FastAPI(lifespan=lifespan)
 async def health():
     return {
         "status": "alive",
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "test_mode": TEST_MODE
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-
 # ================== ОСНОВНЫЕ ФУНКЦИИ ==================
 async def send_meditation():
     today = datetime.now().strftime("%m-%d")
