@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import asyncio
 import telegram
 from fastapi import FastAPI
@@ -61,25 +61,39 @@ async def send_meditation():
 async def scheduler():
     print("🤖 Планировщик запущен...")
     
-    last_sent_date = None                     # Защита от повторной отправки
-    print(f"⏰ Следующая отправка ожидается сегодня в 10:00")
+    last_sent_date = None
 
     while True:
         now = datetime.now()
         today_str = now.strftime("%Y-%m-%d")
 
-        # Отправляем в 10:00, если сегодня ещё не отправляли
-        if now.hour == 10 and now.minute == 0 and last_sent_date != today_str:
+        # === Логика отправки ===
+        should_send = False
+
+        # Если сегодня ещё не отправляли
+        if last_sent_date != today_str:
+            # Отправляем если сейчас 10:00 или уже позже 10:00
+            if now.hour > 10 or (now.hour == 10 and now.minute >= 0):
+                should_send = True
+
+        if should_send:
             success = await send_meditation()
             if success:
                 last_sent_date = today_str
-                print(f"📅 Отправка на {today_str} успешно зафиксирована")
+                print(f"📅 Отправка на {today_str} зафиксирована")
 
-        # Проверка каждые 30 секунд
+        # Логируем следующее время отправки
+        if last_sent_date != today_str:
+            next_send = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)
+            if now.hour >= 10:
+                next_send += timedelta(days=1)
+            minutes_left = int((next_send - now).total_seconds() / 60)
+            print(f"⏰ Следующая отправка: завтра в 10:00 (через ~{minutes_left//60}ч {minutes_left%60}мин)")
+
         await asyncio.sleep(30)
 
 
 # ================== ЗАПУСК ==================
 if __name__ == "__main__":
-    print(f"🚀 Бот запущен | Порт: {PORT} | Время запуска: {datetime.now()}")
+    print(f"🚀 Бот запущен | Порт: {PORT} | Время запуска: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info")
