@@ -40,11 +40,12 @@ async def health():
 # ================== ОСНОВНЫЕ ФУНКЦИИ ==================
 async def send_meditation():
     today = datetime.now().strftime("%m-%d")
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] → Отправка медитации на {today}")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] → Попытка отправки медитации на {today}")
    
     try:
         with open('meditations.json', 'r', encoding='utf-8') as f:
-            meditations = json.load(f)
+            content = f.read().strip()
+            meditations = json.loads(content)
        
         text = meditations.get(today)
         if not text:
@@ -53,8 +54,17 @@ async def send_meditation():
         await bot.send_message(chat_id=CHAT_ID, text=text, parse_mode='HTML')
         print(f"✅ УСПЕШНО ОТПРАВЛЕНО {today}")
         return True
+
+    except json.JSONDecodeError as e:
+        error_msg = f"❌ ОШИБКА JSON в meditations.json!\nСтрока {e.lineno}, символ {e.colno}\n{e.msg}"
+        print(error_msg)
+        await bot.send_message(
+            chat_id=CHAT_ID,
+            text=f"⚠️ Ошибка в файле meditations.json\n\nНе удалось отправить медитацию на {today}\n\nПроверьте запятые и формат JSON!"
+        )
+        return False
     except Exception as e:
-        print(f"❌ Ошибка при отправке медитации: {e}")
+        print(f"❌ Неожиданная ошибка: {e}")
         return False
 
 
