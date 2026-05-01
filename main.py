@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# ================== HEALTH ENDPOINT ==================
 @app.get("/health")
 @app.head("/health")
 async def health():
@@ -35,10 +36,11 @@ async def health():
         "status": "alive",
         "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
+
 # ================== ОСНОВНЫЕ ФУНКЦИИ ==================
 async def send_meditation():
     today = datetime.now().strftime("%m-%d")
-    print(f"[{datetime.now()}] → Отправка медитации на {today}")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] → Отправка медитации на {today}")
    
     try:
         with open('meditations.json', 'r', encoding='utf-8') as f:
@@ -47,34 +49,37 @@ async def send_meditation():
         text = meditations.get(today)
         if not text:
             text = f"🌿 Медитация на {today} ещё не добавлена."
-        
+
         await bot.send_message(chat_id=CHAT_ID, text=text, parse_mode='HTML')
         print(f"✅ УСПЕШНО ОТПРАВЛЕНО {today}")
         return True
     except Exception as e:
-        print(f"❌ Ошибка отправки: {e}")
+        print(f"❌ Ошибка при отправке медитации: {e}")
         return False
 
 
 async def scheduler():
     print("🤖 Планировщик запущен...")
+    
+    last_sent_date = None                     # Защита от повторной отправки
+    print(f"⏰ Следующая отправка ожидается сегодня в 10:00")
 
     while True:
         now = datetime.now()
-        
-        if now.hour == 10 and now.minute == 0:
-            await send_meditation()
-        
-        await asyncio.sleep(60)
+        today_str = now.strftime("%Y-%m-%d")
 
-    while True:
-        now = datetime.now()
-        if now.hour == 10 and now.minute == 0:
-            await send_meditation()
-        
-        await asyncio.sleep(60)
+        # Отправляем в 10:00, если сегодня ещё не отправляли
+        if now.hour == 10 and now.minute == 0 and last_sent_date != today_str:
+            success = await send_meditation()
+            if success:
+                last_sent_date = today_str
+                print(f"📅 Отправка на {today_str} успешно зафиксирована")
+
+        # Проверка каждые 30 секунд
+        await asyncio.sleep(30)
 
 
 # ================== ЗАПУСК ==================
 if __name__ == "__main__":
+    print(f"🚀 Бот запущен | Порт: {PORT} | Время запуска: {datetime.now()}")
     uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info")
